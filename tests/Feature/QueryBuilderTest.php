@@ -114,7 +114,7 @@ class QueryBuilderTest extends TestCase
             'id' => '2',
             'name' => 'Samsung Galaxy S21 Ultra',
             'category_id' => 'SMARTPHONE',
-            'price' => 20000000
+            'price' => 18000000
         ]);
     }
 
@@ -282,5 +282,21 @@ class QueryBuilderTest extends TestCase
             ->get();
 
         $this->helpercheckCountAndLog(2, $result);
+    }
+
+    public function testOrderBy()
+    {
+        $this->helperInsertCategories();
+        $this->helperInsertProducts();
+
+        $result = DB::table('products')
+            ->whereNotNull('id')
+            ->orderBy('price', 'asc')
+            ->orderBy('name', 'desc')
+            ->get();
+
+        $this->helpercheckCountAndLog(2, $result);
+        $this->assertEquals(2, $result[0]->id); // Samsung 18jt
+        $this->assertEquals(1, $result[1]->id); // iPhone 20jt
     }
 }
