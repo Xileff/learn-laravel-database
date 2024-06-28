@@ -232,4 +232,16 @@ class QueryBuilderTest extends TestCase
         $result = DB::table('counters')->where('id', '=', 'sample')->get();
         $this->helpercheckCountAndLog(1, $result);
     }
+
+    // delete from `categories` where `id` = ? 
+    public function testDelete()
+    {
+        $this->helperInsertCategories();
+
+        DB::table('categories')->where('id', '=', 'SMARTPHONE')->delete();
+        // DB::table('categories')->delete('SMARTPHONE'); // must id
+
+        $result = DB::table('categories')->where('id', '=', 'SMARTPHONE')->get();
+        $this->helpercheckCountAndLog(0, $result);
+    }
 }
