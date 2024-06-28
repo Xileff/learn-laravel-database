@@ -284,6 +284,7 @@ class QueryBuilderTest extends TestCase
         $this->helpercheckCountAndLog(2, $result);
     }
 
+    // SELECT * FROM `products` WHERE `id` IS NOT NULL ORDER BY `price` ASC, `name` DESC
     public function testOrderBy()
     {
         $this->helperInsertCategories();
@@ -298,5 +299,18 @@ class QueryBuilderTest extends TestCase
         $this->helpercheckCountAndLog(2, $result);
         $this->assertEquals(2, $result[0]->id); // Samsung 18jt
         $this->assertEquals(1, $result[1]->id); // iPhone 20jt
+    }
+
+    // SELECT * FROM `categories` LIMIT 2 OFFSET 2
+    public function testPaging()
+    {
+        $this->helperInsertCategories();
+
+        $result = DB::table('categories')
+            ->skip(0)
+            ->take(2)
+            ->get();
+
+        $this->helpercheckCountAndLog(2, $result);
     }
 }
