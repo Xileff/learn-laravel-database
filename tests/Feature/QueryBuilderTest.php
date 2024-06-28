@@ -313,4 +313,28 @@ class QueryBuilderTest extends TestCase
 
         $this->helpercheckCountAndLog(2, $result);
     }
+
+    public function helperInsertManyCategories()
+    {
+        for ($i = 0; $i < 100; $i++) {
+            DB::table('categories')->insert([
+                'id' => "CATEGORY-$i",
+                'name' => "Category $i",
+                "created_at" => "2020-10-10 00:00:00"
+            ]);
+        }
+    }
+
+    // SELECT * FROM `categories` ORDER BY `id` ASC LIMIT 10 OFFSET 70
+    // mirip paging, tapi ini gunanya utk query banyak
+    public function testChunk()
+    {
+        $this->helperInsertManyCategories(); // 100
+        DB::table('categories')->orderBy('id')
+            ->chunk(10, function ($categories) {
+                Log::info("Start Chunk");
+                $this->helpercheckCountAndLog(10, $categories);
+                Log::info("End Chunk");
+            });
+    }
 }
