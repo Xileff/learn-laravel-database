@@ -7,3 +7,9 @@ CREATE TABLE categories
     description text,
     created_at timestamp
 ) engine innodb;
+
+CREATE TABLE counters
+(
+	id varchar(100) not null primary key,
+	counter int not null default 0
+) engine innodb;
