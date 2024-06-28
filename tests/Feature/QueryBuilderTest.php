@@ -337,4 +337,32 @@ class QueryBuilderTest extends TestCase
                 Log::info("End Chunk");
             });
     }
+
+    // Mirip chunking tapi hasilnya lazy collection
+    public function testLazy()
+    {
+        $this->helperInsertManyCategories();
+
+        $collection = DB::table('categories')->orderBy('id')->lazy(10);
+        $collection->each(function ($item) {
+            // saat $item dibutuhkan, barulah lazy $collection ngequery 10 data
+            Log::info(json_encode($item));
+        });
+
+        $this->assertNotNull($collection);
+    }
+
+    // Sudah lazy, cuma diambil 3 pula, jadi sisa 7 + 90 data belum diquery lagi
+    // take() nya punya LazyCollection, bukan query builder
+    public function testLazyWithTake()
+    {
+        $this->helperInsertManyCategories();
+        $collection = DB::table('categories')->orderBy('id')->lazy(10)->take(3);
+
+        $this->assertNotNull($collection);
+
+        $collection->each(function ($item) {
+            Log::info(json_encode($item));
+        });
+    }
 }
