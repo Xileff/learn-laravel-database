@@ -9,11 +9,14 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Tests\TestCase;
 
+use function PHPSTORM_META\map;
+
 class QueryBuilderTest extends TestCase
 {
     protected function setUp(): void
     {
         parent::setUp();
+        DB::delete('DELETE FROM products');
         DB::delete('DELETE FROM categories');
         DB::delete('DELETE FROM counters');
     }
@@ -89,6 +92,30 @@ class QueryBuilderTest extends TestCase
         $result->each(function ($item) {
             Log::info(json_encode($item));
         });
+    }
+
+    public function helperCreateCounter()
+    {
+        DB::table('counters')->insert([
+            'id' => 'sample'
+        ]);
+    }
+
+    public function helperInsertProducts()
+    {
+        DB::table('products')->insert([
+            'id' => '1',
+            'name' => 'iPhone 14 Pro Max',
+            'category_id' => 'SMARTPHONE',
+            'price' => 20000000
+        ]);
+
+        DB::table('products')->insert([
+            'id' => '2',
+            'name' => 'Samsung Galaxy S21 Ultra',
+            'category_id' => 'SMARTPHONE',
+            'price' => 20000000
+        ]);
     }
 
     // SELECT * FROM categories WHERE name = ? OR name = ?
@@ -200,8 +227,8 @@ class QueryBuilderTest extends TestCase
         $this->helpercheckCountAndLog(1, $result);
     }
 
-    // select exists(select * from `categories` where (`id` = ?)) as `exists`  
-    // insert into `categories` (`id`, `name`, `description`, `created_at`) values (?, ?, ?, ?)  
+    // SELECT EXISTS(SELECT * FROM `categories` WHERE (`id` = ?)) AS `exists`  
+    // INSERT INTO `categories` (`id`, `name`, `description`, `created_at`) VALUES (?, ?, ?, ?)  
     public function testUpsert()
     {
         DB::table('categories')->updateOrInsert([
@@ -217,13 +244,6 @@ class QueryBuilderTest extends TestCase
         $this->helpercheckCountAndLog(1, $result);
     }
 
-    public function helperCreateCounter()
-    {
-        DB::table('counters')->insert([
-            'id' => 'sample'
-        ]);
-    }
-
     public function testIncrement()
     {
         $this->helperCreateCounter();
@@ -233,7 +253,7 @@ class QueryBuilderTest extends TestCase
         $this->helpercheckCountAndLog(1, $result);
     }
 
-    // delete from `categories` where `id` = ? 
+    // DELETE FROM `categories` WHERE `id` = ? 
     public function testDelete()
     {
         $this->helperInsertCategories();
@@ -243,5 +263,24 @@ class QueryBuilderTest extends TestCase
 
         $result = DB::table('categories')->where('id', '=', 'SMARTPHONE')->get();
         $this->helpercheckCountAndLog(0, $result);
+    }
+
+    /*
+    SELECT 
+        `products`.`id`, `products`.`name`, `categories`.`name` as `category_name`, `products`.`price` 
+    FROM `products` INNER JOIN `categories` 
+    ON `products`.`category_id` = `categories`.`id`
+    */
+    public function testJoin()
+    {
+        $this->helperInsertCategories();
+        $this->helperInsertProducts();
+
+        $result = DB::table('products')
+            ->join('categories', 'products.category_id', '=', 'categories.id')
+            ->select('products.id', 'products.name', 'categories.name as category_name', 'products.price')
+            ->get();
+
+        $this->helpercheckCountAndLog(2, $result);
     }
 }
