@@ -396,4 +396,21 @@ class QueryBuilderTest extends TestCase
         $result = DB::table('products')->sum('price');
         $this->assertEquals(38000000, $result);
     }
+
+    // SELECT COUNT(id) AS total_product, MIN(price) AS min_price, MAX(price) AS max_price FROM `products` 
+    public function testQueryBuilderRawAggregate()
+    {
+        $this->helperInsertCategories();
+        $this->helperInsertProducts();
+
+        $collection = DB::table('products')->select(
+            DB::raw('COUNT(id) AS total_product'),
+            DB::raw('MIN(price) AS min_price'),
+            DB::raw('MAX(price) AS max_price')
+        )->get();
+
+        $this->assertEquals(2, $collection[0]->total_product);
+        $this->assertEquals(18000000, $collection[0]->min_price);
+        $this->assertEquals(20000000, $collection[0]->max_price);
+    }
 }
