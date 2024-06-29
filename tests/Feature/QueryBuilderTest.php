@@ -118,6 +118,23 @@ class QueryBuilderTest extends TestCase
         ]);
     }
 
+    public function helperInsertProductsFood()
+    {
+        DB::table('products')->insert([
+            'id' => '3',
+            'name' => 'Bakso',
+            'category_id' => 'FOOD',
+            'price' => 20000
+        ]);
+
+        DB::table('products')->insert([
+            'id' => '4',
+            'name' => 'Mi Ayam',
+            'category_id' => 'FOOD',
+            'price' => 20000
+        ]);
+    }
+
     // SELECT * FROM categories WHERE name = ? OR name = ?
     public function testWhereOrBiasa()
     {
@@ -403,6 +420,7 @@ class QueryBuilderTest extends TestCase
         $this->helperInsertCategories();
         $this->helperInsertProducts();
 
+        // select bisa nerima raw query sebagai kolom
         $collection = DB::table('products')->select(
             DB::raw('COUNT(id) AS total_product'),
             DB::raw('MIN(price) AS min_price'),
@@ -412,5 +430,49 @@ class QueryBuilderTest extends TestCase
         $this->assertEquals(2, $collection[0]->total_product);
         $this->assertEquals(18000000, $collection[0]->min_price);
         $this->assertEquals(20000000, $collection[0]->max_price);
+    }
+
+    // Cth use case : Hitung jumlah produk per kategori
+    //  SELECT `category_id`, COUNT(id) AS total_product FROM `products` 
+    //  GROUP BY `category_id` ORDER BY `category_id` DESC  
+    public function testGroupBy()
+    {
+        $this->helperInsertCategories();
+        $this->helperInsertProducts();
+        $this->helperInsertProductsFood();
+
+        $collection = DB::table('products')
+            ->select('category_id', DB::raw('COUNT(id) AS total_product'))
+            ->groupBy('category_id')
+            ->orderBy('category_id', 'DESC')
+            ->get();
+
+        $this->assertCount(2, $collection);
+        $this->assertEquals('SMARTPHONE', $collection[0]->category_id);
+        $this->assertEquals('FOOD', $collection[1]->category_id);
+        $this->assertEquals(2, $collection[0]->total_product);
+        $this->assertEquals(2, $collection[1]->total_product);
+    }
+
+    // Cth use case : Hitung jumlah produk per kategori, tapi yg jlh produk > 2
+    // SELECT `category_id`, COUNT(id) AS total_product FROM `products` 
+    // GROUP BY `category_id` 
+    // HAVING COUNT(id) > ? 
+    // ORDER BY `category_id` DESC
+    public function testGroupByHaving()
+    {
+        $this->helperInsertCategories();
+        $this->helperInsertProducts();
+        $this->helperInsertProductsFood();
+
+        $collection = DB::table('products')
+            // ternyata select bisa nerima raw query sebagai param kedua utk cara mengambil data
+            ->select('category_id', DB::raw('COUNT(id) AS total_product'))
+            ->groupBy('category_id')
+            ->having(DB::raw('COUNT(id)'), '>', 2)
+            ->orderBy('category_id', 'DESC')
+            ->get();
+
+        $this->assertCount(0, $collection);
     }
 }

@@ -24,3 +24,8 @@ CREATE TABLE products
     created_at timestamp,
     constraint fk_category_id foreign key (category_id) references categories(id)
 ) engine innodb;
+
+SELECT * FROM categories;
+
+SELECT `category_id`, COUNT(id) AS total_product FROM `products` 
+GROUP BY `category_id` ORDER BY `category_id` DESC;
