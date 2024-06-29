@@ -343,7 +343,7 @@ class QueryBuilderTest extends TestCase
     {
         $this->helperInsertManyCategories();
 
-        $collection = DB::table('categories')->orderBy('id')->lazy(10);
+        $collection = DB::table('categories')->orderBy('id')->lazy(10); // length tetap 100
         $collection->each(function ($item) {
             // saat $item dibutuhkan, barulah lazy $collection ngequery 10 data
             Log::info(json_encode($item));
@@ -358,6 +358,18 @@ class QueryBuilderTest extends TestCase
     {
         $this->helperInsertManyCategories();
         $collection = DB::table('categories')->orderBy('id')->lazy(10)->take(3);
+
+        $this->assertNotNull($collection);
+
+        $collection->each(function ($item) {
+            Log::info(json_encode($item));
+        });
+    }
+
+    public function testCursor()
+    {
+        $this->helperInsertManyCategories();
+        $collection = DB::table('categories')->orderBy('id')->cursor();
 
         $this->assertNotNull($collection);
 
