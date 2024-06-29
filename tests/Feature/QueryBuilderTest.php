@@ -475,4 +475,19 @@ class QueryBuilderTest extends TestCase
 
         $this->assertCount(0, $collection);
     }
+
+    public function testLocking()
+    {
+        $this->helperInsertCategories();
+        $this->helperInsertProducts();
+
+        DB::transaction(function () {
+            $collection = DB::table('products')
+                ->where('id', '=', 1)
+                ->lockForUpdate()
+                ->get();
+
+            $this->assertCount(1, $collection);
+        });
+    }
 }
