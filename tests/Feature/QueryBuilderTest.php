@@ -491,6 +491,9 @@ class QueryBuilderTest extends TestCase
         });
     }
 
+    // Pagination pake OFFSET
+    // Pros : bisa loncat loncat halaman
+    // Cons : akan lambat jika datanya sangat banyak
     public function testPaginate()
     {
         $this->helperInsertCategories();
@@ -530,6 +533,32 @@ class QueryBuilderTest extends TestCase
                 Log::info(json_encode($item));
             }
             $page++;
+        }
+    }
+
+    // Pagination pake SEARCH AFTER
+    // Pros : Performa cepat
+    // Cons : Hanya bisa mulai dari halaman pertama, kemudian cuma bisa next dan prev
+    // Query pertama : SELECT * FROM `categories` ORDER BY `id` ASC LIMIT 3 
+    // Query seterusnya : SELECT * FROM `categories` WHERE (`id` > id sebelumnya) ORDER BY `id` ASC LIMIT 3
+    // Kenapa LIMIT-nya 3, padahal perPage 2? Karena data yg ke-3 itu sebagai penanda, apakah masih ada next page atau engga
+    public function testCursorPagination()
+    {
+        $this->helperInsertCategories();
+
+        $cursor = 'id';
+        while (true) {
+            $paginate = DB::table('categories')->orderBy('id')->cursorPaginate(perPage: 2, cursor: $cursor);
+
+            foreach ($paginate->items() as $item) {
+                $this->assertNotNull($item);
+                Log::info(json_encode($item));
+            }
+
+            $cursor = $paginate->nextCursor();
+            if ($cursor == null) {
+                break;
+            }
         }
     }
 }
