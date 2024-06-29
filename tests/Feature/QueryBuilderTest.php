@@ -490,4 +490,46 @@ class QueryBuilderTest extends TestCase
             $this->assertCount(1, $collection);
         });
     }
+
+    public function testPaginate()
+    {
+        $this->helperInsertCategories();
+        $this->helperInsertProducts();
+        $this->helperInsertProductsFood();
+
+        $paginated = DB::table('products')->paginate(perPage: 2, page: 1);
+
+        $this->assertCount(2, $paginated); // page 1 has 2 products
+        $this->assertEquals(2, $paginated->perPage()); // each page has 2 products
+        $this->assertEquals(1, $paginated->currentPage()); // current page is 1
+        $this->assertEquals(2, $paginated->lastPage()); // last page is total (4) / perPage (2) = 2
+        $this->assertEquals(4, $paginated->total()); // total items are 4
+
+        $collection = $paginated->items(); // current page is 1, with 2 products
+        $this->assertCount(2, $collection);
+        foreach ($collection as $item) {
+            Log::info(json_encode($item));
+        }
+    }
+
+    public function testIterateAllPagination()
+    {
+        $this->helperInsertCategories();
+        $this->helperInsertProducts();
+        $this->helperInsertProductsFood();
+
+        $page = 1;
+        while (true) {
+            $paginated = DB::table('products')->paginate(perPage: 2, page: $page);
+            if ($paginated->isEmpty()) {
+                break;
+            }
+            $collection = $paginated->items();
+            $this->assertCount(2, $collection);
+            foreach ($collection as $item) {
+                Log::info(json_encode($item));
+            }
+            $page++;
+        }
+    }
 }
