@@ -377,4 +377,23 @@ class QueryBuilderTest extends TestCase
             Log::info(json_encode($item));
         });
     }
+
+    // SELECT COUNT(`id`) AS AGGREGATE FROM `products`
+    public function testAggregate()
+    {
+        $this->helperInsertCategories();
+        $this->helperInsertProducts();
+
+        $result = DB::table('products')->count('id');
+        $this->assertEquals(2, $result);
+
+        $result = DB::table('products')->min('price');
+        $this->assertEquals(18000000, $result);
+
+        $result = DB::table('products')->max('price');
+        $this->assertEquals(20000000, $result);
+
+        $result = DB::table('products')->sum('price');
+        $this->assertEquals(38000000, $result);
+    }
 }
