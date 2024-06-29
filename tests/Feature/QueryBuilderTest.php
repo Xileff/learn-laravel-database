@@ -2,6 +2,10 @@
 
 namespace Tests\Feature;
 
+use Database\Seeders\CategorySeeder;
+use Database\Seeders\CounterSeeder;
+use Database\Seeders\ProductFoodSeeder;
+use Database\Seeders\ProductSeeder;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
@@ -53,35 +57,7 @@ class QueryBuilderTest extends TestCase
     // helper function for creating 4 dummy data
     public function helperInsertCategories()
     {
-        DB::table('categories')->insert([
-            'id' => 'GADGET',
-            'name' => 'Gadget',
-            'created_at' => '2020-10-10 10:10:10'
-        ]);
-
-        DB::table('categories')->insert([
-            'id' => 'FOOD',
-            'name' => 'Food',
-            'created_at' => '2020-10-10 10:10:10'
-        ]);
-
-        DB::table('categories')->insert([
-            'id' => 'LAPTOP',
-            'name' => 'Laptop',
-            'created_at' => '2020-10-10 10:10:10'
-        ]);
-
-        DB::table('categories')->insert([
-            'id' => 'FASHION',
-            'name' => 'Fashion',
-            'created_at' => '2020-10-10 10:10:10'
-        ]);
-
-        DB::table('categories')->insert([
-            'id' => 'SMARTPHONE',
-            'name' => 'Smartphone',
-            'created_at' => '2020-10-10 10:10:10'
-        ]);
+        $this->seed(CategorySeeder::class);
     }
 
     // helper function for asserting amount and logging
@@ -96,43 +72,17 @@ class QueryBuilderTest extends TestCase
 
     public function helperCreateCounter()
     {
-        DB::table('counters')->insert([
-            'id' => 'sample'
-        ]);
+        $this->seed(CounterSeeder::class);
     }
 
     public function helperInsertProducts()
     {
-        DB::table('products')->insert([
-            'id' => '1',
-            'name' => 'iPhone 14 Pro Max',
-            'category_id' => 'SMARTPHONE',
-            'price' => 20000000
-        ]);
-
-        DB::table('products')->insert([
-            'id' => '2',
-            'name' => 'Samsung Galaxy S21 Ultra',
-            'category_id' => 'SMARTPHONE',
-            'price' => 18000000
-        ]);
+        $this->seed(ProductSeeder::class);
     }
 
     public function helperInsertProductsFood()
     {
-        DB::table('products')->insert([
-            'id' => '3',
-            'name' => 'Bakso',
-            'category_id' => 'FOOD',
-            'price' => 20000
-        ]);
-
-        DB::table('products')->insert([
-            'id' => '4',
-            'name' => 'Mi Ayam',
-            'category_id' => 'FOOD',
-            'price' => 20000
-        ]);
+        $this->seed(ProductFoodSeeder::class);
     }
 
     // SELECT * FROM categories WHERE name = ? OR name = ?
