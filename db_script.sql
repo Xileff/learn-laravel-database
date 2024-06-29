@@ -29,3 +29,7 @@ SELECT * FROM categories;
 
 SELECT `category_id`, COUNT(id) AS total_product FROM `products` 
 GROUP BY `category_id` ORDER BY `category_id` DESC;
+
+DROP table products;
+DROP table categories;
+DROP table counters;
